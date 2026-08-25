@@ -16,6 +16,8 @@ dist-ssr
 firebase-debug.log
 firestore-debug.log
 
+.claude/scheduled_tasks.lock
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

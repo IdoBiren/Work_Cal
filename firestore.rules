@@ -6,7 +6,7 @@ service cloud.firestore {
     // The one account that is always treated as manager, so there is a way
     // to approve the very first real manager. Change this to your own email.
     function isBootstrapManager() {
-      return request.auth.token.email == 'oferkoren2@gmail.com';
+      return request.auth.token.email.lower() == 'idobi.renboim.ido@gmail.com';
     }
 
     function isSignedIn() {

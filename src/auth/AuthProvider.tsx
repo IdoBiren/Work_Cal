@@ -72,7 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
   }, [user])
 
-  const isBootstrapManager = !!user?.email && user.email === BOOTSTRAP_MANAGER_EMAIL
+  const isBootstrapManager =
+    !!user?.email && !!BOOTSTRAP_MANAGER_EMAIL && user.email.toLowerCase() === BOOTSTRAP_MANAGER_EMAIL.toLowerCase()
   const isManager = isBootstrapManager || (profile?.role === 'manager' && profile?.status === 'approved')
   const isApproved = isBootstrapManager || profile?.status === 'approved'
 
