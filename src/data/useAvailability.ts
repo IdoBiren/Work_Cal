@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../auth/AuthProvider'
+import { shiftWeekId } from '../lib/dates'
 import { DEFAULT_END, DEFAULT_START } from '../lib/slots'
 import type { DayAvailability } from '../lib/coverage'
 
@@ -32,9 +33,8 @@ export function useAvailability(weekId: string) {
     })
   }, [user, weekId])
 
-  const setDay = async (weekday: number, value: DayAvailability) => {
+  const persist = async (next: WeekDays) => {
     if (!user) return
-    const next = { ...days, [weekday]: value }
     setDays(next)
     setSaving(true)
     try {
@@ -49,5 +49,22 @@ export function useAvailability(weekId: string) {
     }
   }
 
-  return { days, setDay, loading, saving }
+  const setDay = (weekday: number, value: DayAvailability) => persist({ ...days, [weekday]: value })
+
+  const hasAnyAvailability = Object.values(days).some((d) => d.available)
+
+  /** Copies the availability of the week right before `weekId` into it. Returns whether there was anything to copy. */
+  const copyFromPreviousWeek = async (): Promise<boolean> => {
+    if (!user) return false
+    const prevWeekId = shiftWeekId(weekId, -1)
+    const ref = doc(db, 'weeks', prevWeekId, 'availability', user.uid)
+    const snap = await getDoc(ref)
+    const prevDays = snap.data()?.days as WeekDays | undefined
+    if (!prevDays || !Object.values(prevDays).some((d) => d.available)) return false
+
+    await persist({ ...emptyWeek(), ...prevDays })
+    return true
+  }
+
+  return { days, setDay, loading, saving, hasAnyAvailability, copyFromPreviousWeek }
 }
