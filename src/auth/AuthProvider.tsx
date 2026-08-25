@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore'
 import { auth, db, googleProvider } from '../lib/firebase'
 
 export type Role = 'employee' | 'manager'
@@ -21,10 +21,12 @@ interface AuthContextValue {
   user: User | null
   profile: UserProfile | null
   loading: boolean
+  needsProfile: boolean
   isManager: boolean
   isApproved: boolean
   login: () => Promise<void>
   logout: () => Promise<void>
+  completeProfile: (displayName: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -36,27 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profileResolved, setProfileResolved] = useState(false)
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
+    return onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser)
       setAuthResolved(true)
-
       if (!firebaseUser) {
         setProfile(null)
         setProfileResolved(true)
-        return
-      }
-
-      const ref = doc(db, 'users', firebaseUser.uid)
-      const snap = await getDoc(ref)
-      if (!snap.exists()) {
-        await setDoc(ref, {
-          email: firebaseUser.email ?? '',
-          displayName: firebaseUser.displayName ?? '',
-          photoURL: firebaseUser.photoURL ?? '',
-          role: 'employee',
-          status: 'pending',
-          createdAt: serverTimestamp(),
-        })
       }
     })
   }, [])
@@ -77,6 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isManager = isBootstrapManager || (profile?.role === 'manager' && profile?.status === 'approved')
   const isApproved = isBootstrapManager || profile?.status === 'approved'
 
+  const loading = !authResolved || (!!user && !profileResolved)
+  const needsProfile = !loading && !!user && !profile
+
   const login = async () => {
     await signInWithPopup(auth, googleProvider)
   }
@@ -85,10 +75,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth)
   }
 
-  const loading = !authResolved || (!!user && !profileResolved)
+  const completeProfile = async (displayName: string) => {
+    if (!user) return
+    const ref = doc(db, 'users', user.uid)
+    await setDoc(ref, {
+      email: user.email ?? '',
+      displayName,
+      photoURL: user.photoURL ?? '',
+      role: 'employee',
+      status: 'pending',
+      createdAt: serverTimestamp(),
+    })
+  }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isManager, isApproved, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, profile, loading, needsProfile, isManager, isApproved, login, logout, completeProfile }}
+    >
       {children}
     </AuthContext.Provider>
   )

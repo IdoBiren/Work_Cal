@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireApproved, RequireManager } from './auth/Guards'
 import LoginPage from './pages/LoginPage'
+import CompleteProfilePage from './pages/CompleteProfilePage'
 import PendingPage from './pages/PendingPage'
 import MyAvailabilityPage from './pages/MyAvailabilityPage'
 import WeekSummaryPage from './pages/WeekSummaryPage'
@@ -14,6 +15,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/complete-profile" element={<CompleteProfilePage />} />
           <Route path="/pending" element={<PendingPage />} />
           <Route
             path="/"
