@@ -1,4 +1,4 @@
-import { SLOT_COUNT, rangeCoversSlot } from './slots'
+import { SLOT_COUNT, rangeCoversSlot, slotCountForDay } from './slots'
 import { WORKDAYS } from './dates'
 
 export interface DayAvailability {
@@ -41,7 +41,7 @@ export function computeCoverage(
     const requiredForDay = requirements[weekday] ?? Array(SLOT_COUNT).fill(0)
     const slots: SlotCoverage[] = []
 
-    for (let slotIndex = 0; slotIndex < SLOT_COUNT; slotIndex++) {
+    for (let slotIndex = 0; slotIndex < slotCountForDay(weekday); slotIndex++) {
       const availableEmployees = employees
         .filter((emp) => {
           const day = emp.days[weekday]

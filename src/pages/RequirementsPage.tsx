@@ -5,7 +5,7 @@ import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import { useRequirements } from '../data/useRequirements'
 import { WEEKDAY_NAMES, WORKDAYS, weekIdOf } from '../lib/dates'
-import { SLOT_COUNT, slotLabel } from '../lib/slots'
+import { SLOT_COUNT, slotCountForDay, slotLabel } from '../lib/slots'
 import type { WeekdayRequirements } from '../lib/coverage'
 
 function RequirementsEditor({
@@ -24,14 +24,23 @@ function RequirementsEditor({
   const setWholeDay = (weekday: number) => {
     const n = Number(window.prompt('כמה עובדים נדרשים בכל שעות היום?', '1') ?? '')
     if (!Number.isFinite(n)) return
-    onChange({ ...value, [weekday]: Array(SLOT_COUNT).fill(Math.max(0, n)) })
+    const count = slotCountForDay(weekday)
+    const row = Array(SLOT_COUNT).fill(0)
+    for (let s = 0; s < count; s++) row[s] = Math.max(0, n)
+    onChange({ ...value, [weekday]: row })
   }
 
+  // Only overwrite the slots each target day actually has (Friday is short),
+  // so copying to/from Friday never zeroes-out or fabricates other days' hours.
   const copyToAll = (weekday: number) => {
-    const row = [...value[weekday]]
+    const row = value[weekday]
     const next: WeekdayRequirements = { ...value }
     WORKDAYS.forEach((i) => {
-      next[i] = [...row]
+      if (i === weekday) return
+      const count = Math.min(slotCountForDay(weekday), slotCountForDay(i))
+      const targetRow = [...(next[i] ?? Array(SLOT_COUNT).fill(0))]
+      for (let s = 0; s < count; s++) targetRow[s] = row[s]
+      next[i] = targetRow
     })
     onChange(next)
   }
@@ -53,7 +62,7 @@ function RequirementsEditor({
             </div>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-9 gap-1">
-            {Array.from({ length: SLOT_COUNT }, (_, slotIndex) => (
+            {Array.from({ length: slotCountForDay(weekday) }, (_, slotIndex) => (
               <label key={slotIndex} className="text-center">
                 <div className="text-[10px] text-slate-400">{slotLabel(slotIndex).split('–')[0]}</div>
                 <input

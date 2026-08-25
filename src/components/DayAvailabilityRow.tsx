@@ -1,5 +1,5 @@
 import { formatDayLabel, WEEKDAY_NAMES } from '../lib/dates'
-import { DEFAULT_END, DEFAULT_START } from '../lib/slots'
+import { DEFAULT_START, defaultEndForDay } from '../lib/slots'
 import type { DayAvailability } from '../lib/coverage'
 
 export default function DayAvailabilityRow({
@@ -13,11 +13,13 @@ export default function DayAvailabilityRow({
   value: DayAvailability
   onChange: (value: DayAvailability) => void
 }) {
+  const dayEnd = defaultEndForDay(weekday)
+
   const toggle = () => {
     if (value.available) {
       onChange({ ...value, available: false })
     } else {
-      onChange({ available: true, start: value.start || DEFAULT_START, end: value.end || DEFAULT_END })
+      onChange({ available: true, start: value.start || DEFAULT_START, end: value.end || dayEnd })
     }
   }
 
@@ -37,7 +39,7 @@ export default function DayAvailabilityRow({
             type="time"
             value={value.start}
             min="07:00"
-            max="16:00"
+            max={dayEnd}
             onChange={(e) => onChange({ ...value, start: e.target.value })}
             className="border border-slate-300 rounded-lg px-2 py-1"
           />
@@ -46,7 +48,7 @@ export default function DayAvailabilityRow({
             type="time"
             value={value.end}
             min="07:00"
-            max="16:00"
+            max={dayEnd}
             onChange={(e) => onChange({ ...value, end: e.target.value })}
             className="border border-slate-300 rounded-lg px-2 py-1"
           />
