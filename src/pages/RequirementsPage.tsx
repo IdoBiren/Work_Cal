@@ -4,9 +4,8 @@ import WeekPicker from '../components/WeekPicker'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import { useRequirements } from '../data/useRequirements'
-import { WEEKDAY_NAMES } from '../lib/dates'
+import { WEEKDAY_NAMES, WORKDAYS, weekIdOf } from '../lib/dates'
 import { SLOT_COUNT, slotLabel } from '../lib/slots'
-import { weekIdOf } from '../lib/dates'
 import type { WeekdayRequirements } from '../lib/coverage'
 
 function RequirementsEditor({
@@ -30,14 +29,16 @@ function RequirementsEditor({
 
   const copyToAll = (weekday: number) => {
     const row = [...value[weekday]]
-    const next: WeekdayRequirements = {}
-    for (let i = 0; i < 7; i++) next[i] = [...row]
+    const next: WeekdayRequirements = { ...value }
+    WORKDAYS.forEach((i) => {
+      next[i] = [...row]
+    })
     onChange(next)
   }
 
   return (
     <div className="space-y-4">
-      {Array.from({ length: 7 }, (_, weekday) => (
+      {WORKDAYS.map((weekday) => (
         <div key={weekday} className="border-b border-slate-100 pb-3 last:border-0">
           <div className="flex items-center justify-between mb-2">
             <span className="font-medium text-slate-700 text-sm">יום {WEEKDAY_NAMES[weekday]}</span>

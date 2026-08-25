@@ -2,6 +2,9 @@ import { addDays, format, startOfWeek } from 'date-fns'
 
 export const WEEKDAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
+/** Weekday indices the system operates on (Sun..Fri) — Saturday is excluded everywhere. */
+export const WORKDAYS = [0, 1, 2, 3, 4, 5]
+
 /** weekId = date of the Sunday that starts the week containing `date`, as YYYY-MM-DD. */
 export function weekIdOf(date: Date): string {
   const sunday = startOfWeek(date, { weekStartsOn: 0 })

@@ -5,7 +5,7 @@ import DayAvailabilityRow from '../components/DayAvailabilityRow'
 import Card from '../components/ui/Card'
 import Spinner from '../components/ui/Spinner'
 import { useAvailability } from '../data/useAvailability'
-import { weekDates, weekIdOf } from '../lib/dates'
+import { weekDates, weekIdOf, WORKDAYS } from '../lib/dates'
 
 export default function MyAvailabilityPage() {
   const [weekId, setWeekId] = useState(weekIdOf(new Date()))
@@ -20,11 +20,11 @@ export default function MyAvailabilityPage() {
           <Spinner />
         ) : (
           <div>
-            {dates.map((date, weekday) => (
+            {WORKDAYS.map((weekday) => (
               <DayAvailabilityRow
                 key={weekday}
                 weekday={weekday}
-                date={date}
+                date={dates[weekday]}
                 value={days[weekday]}
                 onChange={(value) => setDay(weekday, value)}
               />
