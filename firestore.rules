@@ -1,0 +1,62 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // The one account that is always treated as manager, so there is a way
+    // to approve the very first real manager. Change this to your own email.
+    function isBootstrapManager() {
+      return request.auth.token.email == 'oferkoren2@gmail.com';
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isManager() {
+      return isSignedIn() && (
+        isBootstrapManager() ||
+        (myUserDoc().data.role == 'manager' && myUserDoc().data.status == 'approved')
+      );
+    }
+
+    function isApproved() {
+      return isSignedIn() && (
+        isBootstrapManager() ||
+        myUserDoc().data.status == 'approved'
+      );
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isManager());
+
+      // First login: a user may create only their own doc, and only as a
+      // pending employee — never self-assign manager/approved.
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'employee'
+        && request.resource.data.status == 'pending';
+
+      // Managers can change role/status (approve, reject, promote).
+      allow update: if isManager();
+    }
+
+    match /settings/{docId} {
+      allow read: if isApproved();
+      allow write: if isManager();
+    }
+
+    match /weeks/{weekId} {
+      allow read: if isApproved();
+      allow write: if isManager();
+
+      match /availability/{uid} {
+        allow read: if isSignedIn() && (request.auth.uid == uid || isManager());
+        allow write: if isApproved() && request.auth.uid == uid;
+      }
+    }
+  }
+}
