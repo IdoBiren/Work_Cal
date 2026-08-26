@@ -5,6 +5,16 @@ export const WEEKDAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי'
 /** Weekday indices the system operates on (Sun..Fri) — Saturday is excluded everywhere. */
 export const WORKDAYS = [0, 1, 2, 3, 4, 5]
 
+/** Short labels for printable schedules: letters for Sun-Thu, spelled out for Friday (standard Hebrew convention). */
+export const DAY_SHORT_LABELS: Record<number, string> = {
+  0: 'א',
+  1: 'ב',
+  2: 'ג',
+  3: 'ד',
+  4: 'ה',
+  5: 'שישי',
+}
+
 /** weekId = date of the Sunday that starts the week containing `date`, as YYYY-MM-DD. */
 export function weekIdOf(date: Date): string {
   const sunday = startOfWeek(date, { weekStartsOn: 0 })

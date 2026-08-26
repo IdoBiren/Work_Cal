@@ -46,3 +46,9 @@ export const DEFAULT_END = `${String(SLOT_END_HOUR).padStart(2, '0')}:00`
 export function defaultEndForDay(weekday: number): string {
   return `${String(dayEndHour(weekday)).padStart(2, '0')}:00`
 }
+
+/** Drops a leading zero for display: "09:00" -> "9:00". */
+export function shortTime(time: string): string {
+  const [h, m] = time.split(':')
+  return `${Number(h)}:${m}`
+}

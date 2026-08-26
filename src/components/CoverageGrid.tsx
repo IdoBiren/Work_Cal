@@ -1,9 +1,18 @@
 import { useState } from 'react'
 import { formatDayLabel, WEEKDAY_NAMES } from '../lib/dates'
 import { slotLabel } from '../lib/slots'
-import type { DayCoverage } from '../lib/coverage'
+import { formatEmployeeForDay } from '../lib/schedule'
+import type { DayCoverage, EmployeeAvailability } from '../lib/coverage'
 
-export default function CoverageGrid({ days, dates }: { days: DayCoverage[]; dates: Date[] }) {
+export default function CoverageGrid({
+  days,
+  dates,
+  employees,
+}: {
+  days: DayCoverage[]
+  dates: Date[]
+  employees: EmployeeAvailability[]
+}) {
   const [openDay, setOpenDay] = useState<number | null>(null)
 
   return (
@@ -56,13 +65,18 @@ export default function CoverageGrid({ days, dates }: { days: DayCoverage[]; dat
               <div className="border-t border-slate-100 px-4 py-3 bg-slate-50 text-sm">
                 <p className="font-medium text-slate-700 mb-1">מי פנוי ביום זה:</p>
                 {(() => {
-                  const names = new Map<string, string>()
-                  day.slots.forEach((s) => s.availableEmployees.forEach((e) => names.set(e.uid, e.displayName)))
-                  const list = Array.from(names.values())
-                  return list.length > 0 ? (
+                  const dayEmployees = employees.filter((emp) => emp.days[day.weekday]?.available)
+                  return dayEmployees.length > 0 ? (
                     <ul className="list-disc pr-5 space-y-0.5">
-                      {list.map((name) => (
-                        <li key={name}>{name}</li>
+                      {dayEmployees.map((emp) => (
+                        <li key={emp.uid}>
+                          {formatEmployeeForDay(
+                            emp.displayName,
+                            emp.days[day.weekday].start,
+                            emp.days[day.weekday].end,
+                            day.weekday,
+                          )}
+                        </li>
                       ))}
                     </ul>
                   ) : (
