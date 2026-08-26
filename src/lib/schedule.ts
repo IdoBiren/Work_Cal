@@ -8,6 +8,10 @@ function dayEndTime(weekday: number): string {
   return `${String(dayEndHour(weekday)).padStart(2, '0')}:00`
 }
 
+function firstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] ?? fullName
+}
+
 /** e.g. "הדר מ 9:00" or "מריאל עד 13:00" or plain "יהונתן" if available the whole day. */
 export function formatEmployeeForDay(name: string, start: string, end: string, weekday: number): string {
   let label = name
@@ -24,7 +28,7 @@ export function buildScheduleText(weekId: string, employees: EmployeeAvailabilit
   const lines = WORKDAYS.map((weekday) => {
     const names = employees
       .filter((emp) => emp.days[weekday]?.available)
-      .map((emp) => formatEmployeeForDay(emp.displayName, emp.days[weekday].start, emp.days[weekday].end, weekday))
+      .map((emp) => formatEmployeeForDay(firstName(emp.displayName), emp.days[weekday].start, emp.days[weekday].end, weekday))
 
     return `${DAY_SHORT_LABELS[weekday]}-${names.length > 0 ? names.join(', ') : 'אין'}`
   })
