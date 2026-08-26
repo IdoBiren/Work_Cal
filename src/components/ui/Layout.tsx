@@ -16,8 +16,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <h1 className="font-bold text-lg text-slate-800 shrink-0">סידור עבודה</h1>
-          <Button variant="ghost" onClick={logout} className="text-xs shrink-0">
-            {profile?.displayName ?? ''} · יציאה
+          <Button variant="ghost" onClick={logout} className="text-xs min-w-0">
+            <span className="block truncate">{profile?.displayName ?? ''} · יציאה</span>
           </Button>
         </div>
         <nav className="max-w-3xl mx-auto px-4 pb-2 flex gap-2 overflow-x-auto">

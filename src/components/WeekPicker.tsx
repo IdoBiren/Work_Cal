@@ -12,7 +12,7 @@ export default function WeekPicker({
   const isCurrentWeek = weekId === weekIdOf(new Date())
 
   return (
-    <div className="flex items-center justify-between gap-2 mb-4">
+    <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
       <Button variant="secondary" onClick={() => onChange(shiftWeekId(weekId, -1))}>
         ← שבוע קודם
       </Button>

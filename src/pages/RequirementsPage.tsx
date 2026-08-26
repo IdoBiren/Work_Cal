@@ -49,7 +49,7 @@ function RequirementsEditor({
     <div className="space-y-4">
       {WORKDAYS.map((weekday) => (
         <div key={weekday} className="border-b border-slate-100 pb-3 last:border-0">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-wrap items-center justify-between gap-y-1 mb-2">
             <span className="font-medium text-slate-700 text-sm">יום {WEEKDAY_NAMES[weekday]}</span>
             <div className="flex gap-1">
               <button className="text-xs text-blue-600 underline" onClick={() => setWholeDay(weekday)}>

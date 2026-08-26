@@ -29,12 +29,12 @@ export default function ManageUsersPage() {
           ) : (
             <ul className="space-y-2">
               {pending.map((u) => (
-                <li key={u.uid} className="flex items-center justify-between gap-2 py-1">
-                  <div>
-                    <div className="text-sm font-medium text-slate-700">{u.displayName}</div>
-                    <div className="text-xs text-slate-400">{u.email}</div>
+                <li key={u.uid} className="flex flex-wrap items-center justify-between gap-2 py-1">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-slate-700 truncate">{u.displayName}</div>
+                    <div className="text-xs text-slate-400 truncate">{u.email}</div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     <Button onClick={() => setStatus(u.uid, 'approved')}>אישור</Button>
                     <Button variant="danger" onClick={() => setStatus(u.uid, 'rejected')}>
                       דחייה
@@ -50,14 +50,14 @@ export default function ManageUsersPage() {
           <h2 className="font-bold text-slate-800 mb-3">כל העובדים</h2>
           <ul className="space-y-2">
             {others.map((u) => (
-              <li key={u.uid} className="flex items-center justify-between gap-2 py-1">
-                <div>
-                  <div className="text-sm font-medium text-slate-700">{u.displayName}</div>
-                  <div className="text-xs text-slate-400">
+              <li key={u.uid} className="flex flex-wrap items-center justify-between gap-2 py-1">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-700 truncate">{u.displayName}</div>
+                  <div className="text-xs text-slate-400 truncate">
                     {u.email} · {statusLabel[u.status]} · {u.role === 'manager' ? 'מנהל' : 'עובד'}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   {u.status === 'approved' && u.role === 'employee' && (
                     <Button variant="secondary" onClick={() => setRole(u.uid, 'manager')}>
                       הפוך למנהל
