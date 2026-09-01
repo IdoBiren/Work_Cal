@@ -40,8 +40,14 @@ service cloud.firestore {
         && request.resource.data.role == 'employee'
         && request.resource.data.status == 'pending';
 
-      // Managers can change role/status (approve, reject, promote).
-      allow update: if isManager();
+      // Managers can change role/status/etc (approve, reject, promote, mark fixed-schedule).
+      // A fixed-schedule employee may additionally edit only their own fixedDays field.
+      allow update: if isManager() || (
+        isSignedIn() && request.auth.uid == uid &&
+        resource.data.status == 'approved' &&
+        resource.data.isFixedSchedule == true &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fixedDays'])
+      );
     }
 
     match /settings/{docId} {

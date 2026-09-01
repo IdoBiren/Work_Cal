@@ -9,7 +9,7 @@ export default function DayAvailabilityRow({
   onChange,
 }: {
   weekday: number
-  date: Date
+  date?: Date
   value: DayAvailability
   onChange: (value: DayAvailability) => void
 }) {
@@ -29,7 +29,7 @@ export default function DayAvailabilityRow({
         <input type="checkbox" checked={value.available} onChange={toggle} className="h-5 w-5 accent-blue-600" />
         <span className="text-sm font-medium text-slate-700">
           יום {WEEKDAY_NAMES[weekday]}
-          <span className="block text-xs text-slate-400 font-normal">{formatDayLabel(date)}</span>
+          {date && <span className="block text-xs text-slate-400 font-normal">{formatDayLabel(date)}</span>}
         </span>
       </label>
 

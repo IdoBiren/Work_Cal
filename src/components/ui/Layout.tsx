@@ -4,7 +4,7 @@ import { useAuth } from '../../auth/AuthProvider'
 import Button from './Button'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
+  `px-3 py-2 rounded-lg text-sm font-medium text-center whitespace-nowrap ${
     isActive ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'
   }`
 
@@ -20,9 +20,9 @@ export default function Layout({ children }: { children: ReactNode }) {
             <span className="block truncate">{profile?.displayName ?? ''} · יציאה</span>
           </Button>
         </div>
-        <nav className="max-w-3xl mx-auto px-4 pb-2 flex gap-2 overflow-x-auto">
+        <nav className="max-w-3xl mx-auto px-4 pb-2 grid grid-cols-2 gap-2 sm:flex">
           <NavLink to="/" end className={linkClass}>
-            הזמינות שלי
+            {profile?.isFixedSchedule ? 'הזמנים הקבועים שלי' : 'הזמינות שלי'}
           </NavLink>
           {isManager && (
             <>

@@ -10,6 +10,7 @@ export interface UserRow {
   photoURL: string
   role: Role
   status: Status
+  isFixedSchedule?: boolean
 }
 
 export function useUsers() {
@@ -25,6 +26,8 @@ export function useUsers() {
 
   const setStatus = (uid: string, status: Status) => updateDoc(doc(db, 'users', uid), { status })
   const setRole = (uid: string, role: Role) => updateDoc(doc(db, 'users', uid), { role })
+  const setFixedSchedule = (uid: string, isFixedSchedule: boolean) =>
+    updateDoc(doc(db, 'users', uid), { isFixedSchedule })
 
-  return { users, loading, setStatus, setRole }
+  return { users, loading, setStatus, setRole, setFixedSchedule }
 }

@@ -12,7 +12,7 @@ const statusLabel: Record<string, string> = {
 }
 
 export default function ManageUsersPage() {
-  const { users, loading, setStatus, setRole } = useUsers()
+  const { users, loading, setStatus, setRole, setFixedSchedule } = useUsers()
 
   if (loading) return <Layout><Spinner /></Layout>
 
@@ -55,6 +55,7 @@ export default function ManageUsersPage() {
                   <div className="text-sm font-medium text-slate-700 truncate">{u.displayName}</div>
                   <div className="text-xs text-slate-400 truncate">
                     {u.email} · {statusLabel[u.status]} · {u.role === 'manager' ? 'מנהל' : 'עובד'}
+                    {u.isFixedSchedule ? ' · קבוע' : ''}
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -66,6 +67,16 @@ export default function ManageUsersPage() {
                   {u.status === 'approved' && u.role === 'manager' && (
                     <Button variant="secondary" onClick={() => setRole(u.uid, 'employee')}>
                       הסר הרשאת מנהל
+                    </Button>
+                  )}
+                  {u.status === 'approved' && !u.isFixedSchedule && (
+                    <Button variant="secondary" onClick={() => setFixedSchedule(u.uid, true)}>
+                      הפוך לעובד קבוע
+                    </Button>
+                  )}
+                  {u.status === 'approved' && u.isFixedSchedule && (
+                    <Button variant="secondary" onClick={() => setFixedSchedule(u.uid, false)}>
+                      הסר סטטוס קבוע
                     </Button>
                   )}
                   {u.status === 'rejected' && (

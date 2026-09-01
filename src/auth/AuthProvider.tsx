@@ -13,6 +13,7 @@ export interface UserProfile {
   photoURL: string
   role: Role
   status: Status
+  isFixedSchedule?: boolean
 }
 
 const BOOTSTRAP_MANAGER_EMAIL = import.meta.env.VITE_BOOTSTRAP_MANAGER_EMAIL as string | undefined

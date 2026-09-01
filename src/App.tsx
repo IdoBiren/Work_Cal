@@ -4,7 +4,7 @@ import { RequireApproved, RequireManager } from './auth/Guards'
 import LoginPage from './pages/LoginPage'
 import CompleteProfilePage from './pages/CompleteProfilePage'
 import PendingPage from './pages/PendingPage'
-import MyAvailabilityPage from './pages/MyAvailabilityPage'
+import HomePage from './pages/HomePage'
 import WeekSummaryPage from './pages/WeekSummaryPage'
 import RequirementsPage from './pages/RequirementsPage'
 import ManageUsersPage from './pages/ManageUsersPage'
@@ -21,7 +21,7 @@ function App() {
             path="/"
             element={
               <RequireApproved>
-                <MyAvailabilityPage />
+                <HomePage />
               </RequireApproved>
             }
           />

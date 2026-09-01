@@ -8,7 +8,7 @@ import type { DayAvailability } from '../lib/coverage'
 
 export type WeekDays = Record<number, DayAvailability>
 
-function emptyWeek(): WeekDays {
+export function emptyWeek(): WeekDays {
   const days: WeekDays = {}
   for (let i = 0; i < 7; i++) {
     days[i] = { available: false, start: DEFAULT_START, end: DEFAULT_END }
