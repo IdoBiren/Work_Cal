@@ -4,6 +4,7 @@ import WeekPicker from '../components/WeekPicker'
 import CoverageGrid from '../components/CoverageGrid'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
+import ErrorNote from '../components/ui/ErrorNote'
 import { useWeekAvailability } from '../data/useWeekAvailability'
 import { useFixedEmployees } from '../data/useFixedEmployees'
 import { useRequirements } from '../data/useRequirements'
@@ -13,8 +14,8 @@ import { weekDates, weekIdOf } from '../lib/dates'
 
 export default function WeekSummaryPage() {
   const [weekId, setWeekId] = useState(weekIdOf(new Date()))
-  const { employees: weeklyEmployees, loading: loadingAvail } = useWeekAvailability(weekId)
-  const { employees: fixedEmployees, loading: loadingFixed } = useFixedEmployees()
+  const { employees: weeklyEmployees, loading: loadingAvail, error: availError } = useWeekAvailability(weekId)
+  const { employees: fixedEmployees, loading: loadingFixed, error: fixedError } = useFixedEmployees()
   const { effective, loading: loadingReq } = useRequirements(weekId)
   const dates = weekDates(weekId)
   const [copyStatus, setCopyStatus] = useState<'copied' | null>(null)
@@ -49,6 +50,7 @@ export default function WeekSummaryPage() {
         </Button>
         {copyStatus === 'copied' && <p className="text-xs text-green-600 mt-1">הועתק!</p>}
       </div>
+      <ErrorNote message={availError ?? fixedError} />
       {loading || loadingReq ? (
         <Spinner />
       ) : (

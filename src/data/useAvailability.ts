@@ -4,6 +4,7 @@ import { db } from '../lib/firebase'
 import { useAuth } from '../auth/AuthProvider'
 import { shiftWeekId } from '../lib/dates'
 import { DEFAULT_END, DEFAULT_START } from '../lib/slots'
+import { errorMessage } from '../lib/errors'
 import type { DayAvailability } from '../lib/coverage'
 
 export type WeekDays = Record<number, DayAvailability>
@@ -21,22 +22,33 @@ export function useAvailability(weekId: string) {
   const [days, setDays] = useState<WeekDays>(emptyWeek())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
     setLoading(true)
     const ref = doc(db, 'weeks', weekId, 'availability', user.uid)
-    return onSnapshot(ref, (snap) => {
-      const data = snap.data()
-      setDays(data ? { ...emptyWeek(), ...(data.days as WeekDays) } : emptyWeek())
-      setLoading(false)
-    })
+    return onSnapshot(
+      ref,
+      (snap) => {
+        const data = snap.data()
+        setDays(data ? { ...emptyWeek(), ...(data.days as WeekDays) } : emptyWeek())
+        setLoading(false)
+      },
+      (err) => {
+        setError(errorMessage(err, 'טעינת הזמינות נכשלה.'))
+        setLoading(false)
+      },
+    )
   }, [user, weekId])
 
+  /** Writes the whole week. On failure the local state is rolled back so the UI never lies about being saved. */
   const persist = async (next: WeekDays) => {
     if (!user) return
+    const previous = days
     setDays(next)
     setSaving(true)
+    setError(null)
     try {
       const ref = doc(db, 'weeks', weekId, 'availability', user.uid)
       await setDoc(ref, {
@@ -44,6 +56,9 @@ export function useAvailability(weekId: string) {
         days: next,
         updatedAt: serverTimestamp(),
       })
+    } catch (err) {
+      setDays(previous)
+      setError(errorMessage(err, 'השמירה נכשלה. הסימון לא נשמר.'))
     } finally {
       setSaving(false)
     }
@@ -57,14 +72,19 @@ export function useAvailability(weekId: string) {
   const copyFromPreviousWeek = async (): Promise<boolean> => {
     if (!user) return false
     const prevWeekId = shiftWeekId(weekId, -1)
-    const ref = doc(db, 'weeks', prevWeekId, 'availability', user.uid)
-    const snap = await getDoc(ref)
-    const prevDays = snap.data()?.days as WeekDays | undefined
-    if (!prevDays || !Object.values(prevDays).some((d) => d.available)) return false
+    try {
+      const ref = doc(db, 'weeks', prevWeekId, 'availability', user.uid)
+      const snap = await getDoc(ref)
+      const prevDays = snap.data()?.days as WeekDays | undefined
+      if (!prevDays || !Object.values(prevDays).some((d) => d.available)) return false
 
-    await persist({ ...emptyWeek(), ...prevDays })
-    return true
+      await persist({ ...emptyWeek(), ...prevDays })
+      return true
+    } catch (err) {
+      setError(errorMessage(err, 'ההעתקה מהשבוע הקודם נכשלה.'))
+      return false
+    }
   }
 
-  return { days, setDay, loading, saving, hasAnyAvailability, copyFromPreviousWeek }
+  return { days, setDay, loading, saving, error, hasAnyAvailability, copyFromPreviousWeek }
 }

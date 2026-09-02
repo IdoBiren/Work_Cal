@@ -3,6 +3,7 @@ import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import EmptyState from '../components/ui/EmptyState'
+import ErrorNote from '../components/ui/ErrorNote'
 import { useUsers } from '../data/useUsers'
 
 const statusLabel: Record<string, string> = {
@@ -12,15 +13,28 @@ const statusLabel: Record<string, string> = {
 }
 
 export default function ManageUsersPage() {
-  const { users, loading, setStatus, setRole, setFixedSchedule } = useUsers()
+  const { users, loading, error, setStatus, setRole, setFixedSchedule } = useUsers()
 
   if (loading) return <Layout><Spinner /></Layout>
 
   const pending = users.filter((u) => u.status === 'pending')
   const others = users.filter((u) => u.status !== 'pending')
 
+  // Marking someone fixed swaps their home screen out from under them, so make
+  // the manager aware rather than having it happen silently.
+  const makeFixed = (uid: string, name: string) => {
+    if (
+      window.confirm(
+        `לסמן את ${name} כעובד קבוע?\n\nהמסך "הזמינות שלי" יוחלף אצלו במסך "הזמנים הקבועים שלי", והזמנים שיגדיר שם יחולו על כל שבוע אוטומטית.`,
+      )
+    ) {
+      setFixedSchedule(uid, true)
+    }
+  }
+
   return (
     <Layout>
+      <ErrorNote message={error} />
       <div className="space-y-6">
         <Card>
           <h2 className="font-bold text-slate-800 mb-3">ממתינים לאישור</h2>
@@ -70,7 +84,7 @@ export default function ManageUsersPage() {
                     </Button>
                   )}
                   {u.status === 'approved' && !u.isFixedSchedule && (
-                    <Button variant="secondary" onClick={() => setFixedSchedule(u.uid, true)}>
+                    <Button variant="secondary" onClick={() => makeFixed(u.uid, u.displayName)}>
                       הפוך לעובד קבוע
                     </Button>
                   )}

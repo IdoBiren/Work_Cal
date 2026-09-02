@@ -1,12 +1,37 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthProvider'
+import { useUsers } from '../../data/useUsers'
 import Button from './Button'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 rounded-lg text-sm font-medium text-center whitespace-nowrap ${
     isActive ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'
   }`
+
+function ManagerNav() {
+  const { users } = useUsers()
+  const pendingCount = users.filter((u) => u.status === 'pending').length
+
+  return (
+    <>
+      <NavLink to="/summary" className={linkClass}>
+        סיכום שבועי
+      </NavLink>
+      <NavLink to="/requirements" className={linkClass}>
+        דרישות כיסוי
+      </NavLink>
+      <NavLink to="/users" className={linkClass}>
+        ניהול עובדים
+        {pendingCount > 0 && (
+          <span className="ms-1 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-xs font-bold align-middle">
+            {pendingCount}
+          </span>
+        )}
+      </NavLink>
+    </>
+  )
+}
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { profile, isManager, logout } = useAuth()
@@ -24,19 +49,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/" end className={linkClass}>
             {profile?.isFixedSchedule ? 'הזמנים הקבועים שלי' : 'הזמינות שלי'}
           </NavLink>
-          {isManager && (
-            <>
-              <NavLink to="/summary" className={linkClass}>
-                סיכום שבועי
-              </NavLink>
-              <NavLink to="/requirements" className={linkClass}>
-                דרישות כיסוי
-              </NavLink>
-              <NavLink to="/users" className={linkClass}>
-                ניהול עובדים
-              </NavLink>
-            </>
-          )}
+          {isManager && <ManagerNav />}
         </nav>
       </header>
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-4">{children}</main>

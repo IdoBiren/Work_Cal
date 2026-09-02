@@ -3,6 +3,7 @@ import Layout from '../components/ui/Layout'
 import WeekPicker from '../components/WeekPicker'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
+import ErrorNote from '../components/ui/ErrorNote'
 import { useRequirements } from '../data/useRequirements'
 import { WEEKDAY_NAMES, WORKDAYS, weekIdOf } from '../lib/dates'
 import { SLOT_COUNT, slotCountForDay, slotLabel } from '../lib/slots'
@@ -83,7 +84,7 @@ function RequirementsEditor({
 
 export default function RequirementsPage() {
   const [weekId, setWeekId] = useState(weekIdOf(new Date()))
-  const { template, override, saveTemplate, saveOverride, loading } = useRequirements(weekId)
+  const { template, override, saveTemplate, saveOverride, loading, error } = useRequirements(weekId)
   const [hasOverride, setHasOverride] = useState(false)
   const [overrideDraft, setOverrideDraft] = useState<WeekdayRequirements>(template)
 
@@ -95,6 +96,7 @@ export default function RequirementsPage() {
 
   return (
     <Layout>
+      <ErrorNote message={error} />
       <div className="space-y-6">
         <Card>
           <h2 className="font-bold text-slate-800 mb-1">תבנית קבועה</h2>

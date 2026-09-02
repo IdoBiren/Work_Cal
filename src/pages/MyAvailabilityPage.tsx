@@ -5,12 +5,13 @@ import DayAvailabilityRow from '../components/DayAvailabilityRow'
 import Card from '../components/ui/Card'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
+import ErrorNote from '../components/ui/ErrorNote'
 import { useAvailability } from '../data/useAvailability'
 import { weekDates, weekIdOf, WORKDAYS } from '../lib/dates'
 
 export default function MyAvailabilityPage() {
   const [weekId, setWeekId] = useState(weekIdOf(new Date()))
-  const { days, setDay, loading, saving, hasAnyAvailability, copyFromPreviousWeek } = useAvailability(weekId)
+  const { days, setDay, loading, saving, error, hasAnyAvailability, copyFromPreviousWeek } = useAvailability(weekId)
   const dates = weekDates(weekId)
   const [copyStatus, setCopyStatus] = useState<'copied' | 'empty' | null>(null)
   const [copying, setCopying] = useState(false)
@@ -39,6 +40,7 @@ export default function MyAvailabilityPage() {
         {copyStatus === 'copied' && <p className="text-xs text-green-600 mt-1">הועתק מהשבוע הקודם</p>}
         {copyStatus === 'empty' && <p className="text-xs text-slate-400 mt-1">לא נמצאה זמינות בשבוע הקודם</p>}
       </div>
+      <ErrorNote message={error} />
       <Card>
         {loading ? (
           <Spinner />
