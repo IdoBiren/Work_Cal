@@ -26,16 +26,20 @@ export interface UserProfile {
 
 const BOOTSTRAP_MANAGER_EMAIL = import.meta.env.VITE_BOOTSTRAP_MANAGER_EMAIL as string | undefined
 
+const REDIRECT_PENDING_KEY = 'work_cal_pending_redirect_login'
+
 /**
- * Popup sign-in is unreliable on phones and outright blocked inside embedded
- * browsers (WhatsApp/Instagram/Facebook), which is how a shared link is usually
- * opened. Those get the redirect flow instead.
+ * signInWithPopup works fine on regular mobile Safari/Chrome — only genuinely
+ * embedded in-app browsers (WhatsApp/Instagram/Facebook) block it outright.
+ * Redirect is reserved for those, since it has its own failure mode: our
+ * authDomain (work-cal-a4d58.firebaseapp.com) differs from the hosting domain
+ * (work-cal-a4d58.web.app), and browsers that partition storage per top-level
+ * site (Safari ITP, some Android browsers) can lose the pending-redirect state
+ * across that domain hop — which looks like an infinite "sign in again" loop.
  */
-function prefersRedirectFlow(): boolean {
+function isEmbeddedBrowser(): boolean {
   const ua = navigator.userAgent || ''
-  const isEmbedded = /FBAN|FBAV|Instagram|Line|WhatsApp|wv\)/i.test(ua)
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua)
-  return isEmbedded || isMobile
+  return /FBAN|FBAV|Instagram|Line|WhatsApp|wv\)/i.test(ua)
 }
 
 interface AuthContextValue {
@@ -61,9 +65,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null)
 
   // Surfaces failures from the redirect flow, which land on page load rather
-  // than in the login click handler.
+  // than in the login click handler. Also detects the case where the redirect
+  // silently lost its state (see isEmbeddedBrowser's comment) — getRedirectResult
+  // resolves to null instead of throwing, so a stuck loop looks like nothing
+  // happened rather than an error.
   useEffect(() => {
-    getRedirectResult(auth).catch((err) => setAuthError(errorMessage(err, 'ההתחברות נכשלה.')))
+    const wasPending = sessionStorage.getItem(REDIRECT_PENDING_KEY) === '1'
+    getRedirectResult(auth)
+      .then((result) => {
+        sessionStorage.removeItem(REDIRECT_PENDING_KEY)
+        if (wasPending && !result && !auth.currentUser) {
+          setAuthError(
+            'ההתחברות לא הושלמה — ככל הנראה הדפדפן חוסם שמירת מידע בין אתרים. פתחו את הקישור ישירות ב-Chrome או Safari (לא מתוך אפליקציה אחרת כמו וואטסאפ).',
+          )
+        }
+      })
+      .catch((err) => {
+        sessionStorage.removeItem(REDIRECT_PENDING_KEY)
+        setAuthError(errorMessage(err, 'ההתחברות נכשלה.'))
+      })
   }, [])
 
   useEffect(() => {
@@ -112,10 +132,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loading = !authResolved || (!!user && !profileResolved)
   const needsProfile = !loading && !!user && !profile
 
+  const redirectLogin = async () => {
+    sessionStorage.setItem(REDIRECT_PENDING_KEY, '1')
+    await signInWithRedirect(auth, googleProvider)
+  }
+
   const login = async () => {
     setAuthError(null)
-    if (prefersRedirectFlow()) {
-      await signInWithRedirect(auth, googleProvider)
+    if (isEmbeddedBrowser()) {
+      await redirectLogin()
       return
     }
     try {
@@ -124,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const code = (err as { code?: string })?.code
       // A blocked popup is recoverable — fall back to redirect instead of dead-ending.
       if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
-        await signInWithRedirect(auth, googleProvider)
+        await redirectLogin()
         return
       }
       throw err
