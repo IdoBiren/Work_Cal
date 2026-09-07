@@ -31,6 +31,14 @@ export function shiftWeekId(weekId: string, weeks: number): string {
   return weekIdOf(addDays(sunday, weeks * 7))
 }
 
+/** How many weeks `weekId` is from the current week (0 = this week, 1 = next week, -1 = last week...). */
+export function weekOffsetFromToday(weekId: string): number {
+  const currentSunday = weekIdToSunday(weekIdOf(new Date()))
+  const targetSunday = weekIdToSunday(weekId)
+  const diffDays = Math.round((targetSunday.getTime() - currentSunday.getTime()) / (24 * 60 * 60 * 1000))
+  return Math.round(diffDays / 7)
+}
+
 /** Returns the 7 dates (Sun..Sat) of the given week. */
 export function weekDates(weekId: string): Date[] {
   const sunday = weekIdToSunday(weekId)
