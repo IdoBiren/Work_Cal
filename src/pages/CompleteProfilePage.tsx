@@ -1,13 +1,21 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import Button from '../components/ui/Button'
 import { errorMessage } from '../lib/errors'
 
 export default function CompleteProfilePage() {
-  const { user, completeProfile } = useAuth()
+  const { user, profile, loading, completeProfile } = useAuth()
   const [name, setName] = useState(user?.displayName ?? '')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Reachable directly (old bookmark/tab, browser history) regardless of
+  // actual account state — self-correct instead of showing a stale form
+  // whose submit the rules will reject anyway.
+  if (loading) return null
+  if (!user) return <Navigate to="/login" replace />
+  if (profile) return <Navigate to="/" replace />
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()

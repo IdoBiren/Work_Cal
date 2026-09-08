@@ -1,10 +1,15 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import Button from '../components/ui/Button'
 
 export default function PendingPage() {
   const { profile, logout } = useAuth()
   const [checking, setChecking] = useState(false)
+
+  // Reachable directly (old bookmark/tab) even after approval — don't strand
+  // an approved user on "waiting for approval" forever.
+  if (profile?.status === 'approved') return <Navigate to="/" replace />
 
   const rejected = profile?.status === 'rejected'
 
