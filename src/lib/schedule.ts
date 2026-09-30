@@ -12,6 +12,15 @@ export function firstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] ?? fullName
 }
 
+/** First names always listed first in a copied day, in this order; everyone else keeps their original order after them. */
+const PRIORITY_FIRST_NAMES = [['נאוה', 'נירית'], ['אסיף']]
+
+function priorityOf(name: string): number {
+  const first = firstName(name)
+  const rank = PRIORITY_FIRST_NAMES.findIndex((group) => group.includes(first))
+  return rank === -1 ? PRIORITY_FIRST_NAMES.length : rank
+}
+
 /** e.g. "הדר מ 9:00" or "מריאל עד 13:00" or plain "יהונתן" if available the whole day. */
 export function formatEmployeeForDay(name: string, start: string, end: string, weekday: number): string {
   let label = name
@@ -28,6 +37,7 @@ export function buildScheduleText(weekId: string, employees: EmployeeAvailabilit
   const lines = WORKDAYS.map((weekday) => {
     const names = employees
       .filter((emp) => emp.days[weekday]?.available)
+      .sort((a, b) => priorityOf(a.displayName) - priorityOf(b.displayName))
       .map((emp) => formatEmployeeForDay(firstName(emp.displayName), emp.days[weekday].start, emp.days[weekday].end, weekday))
 
     return `${DAY_SHORT_LABELS[weekday]}-${names.length > 0 ? names.join(', ') : 'אין'}`
