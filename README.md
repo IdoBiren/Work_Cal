@@ -24,7 +24,8 @@ npx firebase-tools deploy
 
 - `users/{uid}` — פרופיל, `role` (`employee`/`manager`), `status` (`pending`/`approved`/`rejected`).
 - `settings/coverageTemplate` — תבנית קבועה: כמה עובדים נדרשים בכל שעה, לפי יום בשבוע.
-- `weeks/{weekId}` — `weekId` הוא תאריך יום ראשון של השבוע (`YYYY-MM-DD`). יכול להכיל `requirementsOverride` שדורס את התבנית לשבוע הזה בלבד.
+- `staff/{id}` — עובדים קבועים ללא משתמש שהמנהל מנהל: `displayName` ו-`days` (הימים והשעות הקבועים).
+- `weeks/{weekId}` — `weekId` הוא תאריך יום ראשון של השבוע (`YYYY-MM-DD`). יכול להכיל `requirementsOverride` שדורס את התבנית לשבוע הזה בלבד, `confirmedStaff` (מזהי עובדי `staff` שאישרו הגעה השבוע — רק הם נספרים בכיסוי), ו-`extraShifts` (עובדים שנוספו חד-פעמית ליום מסוים בשבוע).
 - `weeks/{weekId}/availability/{uid}` — הזמינות שהעובד מילא לאותו שבוע.
 
 החוקים ב-`firestore.rules` הם שכבת האבטחה: עובד חדש נרשם תמיד כ-`pending`/`employee`, ורק מנהל יכול לשנות סטטוס/תפקיד. מייל אחד קבוע ב-`firestore.rules` (`isBootstrapManager`) תמיד נחשב מנהל, כדי שיהיה מי שיאשר את המנהל הראשון בפועל.

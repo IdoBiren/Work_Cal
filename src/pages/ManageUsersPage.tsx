@@ -4,6 +4,7 @@ import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import EmptyState from '../components/ui/EmptyState'
 import ErrorNote from '../components/ui/ErrorNote'
+import StaffManager from '../components/StaffManager'
 import { useUsers } from '../data/useUsers'
 
 const statusLabel: Record<string, string> = {
@@ -106,6 +107,8 @@ export default function ManageUsersPage() {
             ))}
           </ul>
         </Card>
+
+        <StaffManager />
       </div>
     </Layout>
   )

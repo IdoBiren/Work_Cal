@@ -56,6 +56,13 @@ service cloud.firestore {
       );
     }
 
+    // Fixed employees without an app account, managed by managers. Approved
+    // employees can read them so they show up in "who works each day".
+    match /staff/{staffId} {
+      allow read: if isApproved();
+      allow write: if isManager();
+    }
+
     match /settings/{docId} {
       allow read: if isApproved();
       allow write: if isManager();
