@@ -7,11 +7,14 @@ export default function DayAvailabilityRow({
   date,
   value,
   onChange,
+  coworkers,
 }: {
   weekday: number
   date?: Date
   value: DayAvailability
   onChange: (value: DayAvailability) => void
+  /** Labels of the other employees working this day; omit to hide the line. */
+  coworkers?: string[]
 }) {
   const dayEnd = defaultEndForDay(weekday)
 
@@ -53,6 +56,12 @@ export default function DayAvailabilityRow({
             className="border border-slate-300 rounded-lg px-2 py-1"
           />
         </div>
+      )}
+
+      {coworkers && (
+        <p className="w-full text-xs text-slate-500">
+          עובדים ביום זה: {coworkers.length > 0 ? coworkers.join(', ') : <span className="text-slate-400">אף אחד עדיין</span>}
+        </p>
       )}
     </div>
   )

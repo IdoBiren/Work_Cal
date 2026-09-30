@@ -8,7 +8,7 @@ function dayEndTime(weekday: number): string {
   return `${String(dayEndHour(weekday)).padStart(2, '0')}:00`
 }
 
-function firstName(fullName: string): string {
+export function firstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] ?? fullName
 }
 

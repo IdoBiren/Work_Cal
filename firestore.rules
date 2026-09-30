@@ -32,7 +32,13 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isManager());
+      // Approved coworkers may see fixed-schedule employees, so everyone can
+      // see who works each day while filling in their own availability.
+      allow read: if isSignedIn() && (request.auth.uid == uid || isManager() || (
+        isApproved() &&
+        resource.data.isFixedSchedule == true &&
+        resource.data.status == 'approved'
+      ));
 
       // First login: a user may create only their own doc, and only as a
       // pending employee — never self-assign manager/approved.
@@ -60,7 +66,8 @@ service cloud.firestore {
       allow write: if isManager();
 
       match /availability/{uid} {
-        allow read: if isSignedIn() && (request.auth.uid == uid || isManager());
+        // Every approved employee sees everyone's availability (who works which day).
+        allow read: if isApproved();
         allow write: if isApproved() && request.auth.uid == uid;
       }
     }
