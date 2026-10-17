@@ -9,11 +9,11 @@ import ErrorNote from '../components/ui/ErrorNote'
 import { useAvailability } from '../data/useAvailability'
 import { useWeekRoster } from '../data/useWeekRoster'
 import { useAuth } from '../auth/AuthProvider'
-import { weekDates, weekIdOf, WORKDAYS } from '../lib/dates'
+import { weekDates, defaultWeekId, WORKDAYS } from '../lib/dates'
 import { firstName, formatEmployeeForDay } from '../lib/schedule'
 
 export default function MyAvailabilityPage() {
-  const [weekId, setWeekId] = useState(weekIdOf(new Date()))
+  const [weekId, setWeekId] = useState(defaultWeekId)
   const { days, setDay, loading, saving, error, hasAnyAvailability, copyFromPreviousWeek } = useAvailability(weekId)
   const { user } = useAuth()
   const { employees, error: rosterError } = useWeekRoster(weekId)

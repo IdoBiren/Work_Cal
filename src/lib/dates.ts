@@ -21,6 +21,12 @@ export function weekIdOf(date: Date): string {
   return format(sunday, 'yyyy-MM-dd')
 }
 
+/** The week pages open on: the current week on Sunday, and from Monday on the next week (that's the one being planned). */
+export function defaultWeekId(today: Date = new Date()): string {
+  const current = weekIdOf(today)
+  return today.getDay() >= 1 ? shiftWeekId(current, 1) : current
+}
+
 export function weekIdToSunday(weekId: string): Date {
   const [y, m, d] = weekId.split('-').map(Number)
   return new Date(y, m - 1, d)

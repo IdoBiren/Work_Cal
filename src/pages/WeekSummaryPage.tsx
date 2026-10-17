@@ -10,7 +10,7 @@ import { useWeekRoster } from '../data/useWeekRoster'
 import { useRequirements } from '../data/useRequirements'
 import { computeCoverage } from '../lib/coverage'
 import { buildScheduleText } from '../lib/schedule'
-import { DAY_SHORT_LABELS, WORKDAYS, weekDates, weekIdOf } from '../lib/dates'
+import { DAY_SHORT_LABELS, WORKDAYS, weekDates, defaultWeekId } from '../lib/dates'
 import { shortTime } from '../lib/slots'
 import type { StaffMember } from '../data/useStaff'
 
@@ -23,7 +23,7 @@ function staffDaysSummary(member: StaffMember): string {
 }
 
 export default function WeekSummaryPage() {
-  const [weekId, setWeekId] = useState(weekIdOf(new Date()))
+  const [weekId, setWeekId] = useState(defaultWeekId)
   const { employees, unconfirmedStaff, staff, plan, loading, error } = useWeekRoster(weekId)
   const { effective, loading: loadingReq } = useRequirements(weekId)
   const dates = weekDates(weekId)
