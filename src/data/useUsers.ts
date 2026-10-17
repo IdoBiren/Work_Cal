@@ -1,8 +1,22 @@
 import { useEffect, useState } from 'react'
-import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { errorMessage } from '../lib/errors'
+import { shiftWeekId, weekIdOf } from '../lib/dates'
 import type { Role, Status } from '../auth/AuthProvider'
+
+// Availability docs keep a copy of the name; a rename refreshes it in this window of weeks around today.
+const RENAME_WEEKS_BACK = 8
+const RENAME_WEEKS_AHEAD = 4
+
+async function renameInRecentWeeks(uid: string, displayName: string) {
+  const current = weekIdOf(new Date())
+  for (let offset = -RENAME_WEEKS_BACK; offset <= RENAME_WEEKS_AHEAD; offset++) {
+    const ref = doc(db, 'weeks', shiftWeekId(current, offset), 'availability', uid)
+    const snap = await getDoc(ref)
+    if (snap.exists() && snap.data().displayName !== displayName) await updateDoc(ref, { displayName })
+  }
+}
 
 export interface UserRow {
   uid: string
@@ -48,5 +62,14 @@ export function useUsers() {
   const setFixedSchedule = (uid: string, isFixedSchedule: boolean) =>
     run(updateDoc(doc(db, 'users', uid), { isFixedSchedule }), 'עדכון סטטוס "קבוע" נכשל.')
 
-  return { users, loading, error, setStatus, setRole, setFixedSchedule }
+  const renameUser = (uid: string, displayName: string) =>
+    run(
+      (async () => {
+        await updateDoc(doc(db, 'users', uid), { displayName })
+        await renameInRecentWeeks(uid, displayName)
+      })(),
+      'שינוי השם נכשל.',
+    )
+
+  return { users, loading, error, setStatus, setRole, setFixedSchedule, renameUser }
 }

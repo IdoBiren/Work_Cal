@@ -14,7 +14,7 @@ const statusLabel: Record<string, string> = {
 }
 
 export default function ManageUsersPage() {
-  const { users, loading, error, setStatus, setRole, setFixedSchedule } = useUsers()
+  const { users, loading, error, setStatus, setRole, setFixedSchedule, renameUser } = useUsers()
 
   if (loading) return <Layout><Spinner /></Layout>
 
@@ -31,6 +31,11 @@ export default function ManageUsersPage() {
     ) {
       setFixedSchedule(uid, true)
     }
+  }
+
+  const rename = (uid: string, current: string) => {
+    const name = window.prompt('שם חדש:', current)?.trim()
+    if (name && name !== current) renameUser(uid, name)
   }
 
   return (
@@ -73,7 +78,10 @@ export default function ManageUsersPage() {
                     {u.isFixedSchedule ? ' · קבוע' : ''}
                   </div>
                 </div>
-                <div className="flex gap-2 shrink-0">
+                <div className="flex flex-wrap gap-2 shrink-0">
+                  <Button variant="ghost" onClick={() => rename(u.uid, u.displayName)}>
+                    שינוי שם
+                  </Button>
                   {u.status === 'approved' && u.role === 'employee' && (
                     <Button variant="secondary" onClick={() => setRole(u.uid, 'manager')}>
                       הפוך למנהל

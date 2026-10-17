@@ -76,6 +76,9 @@ service cloud.firestore {
         // Every approved employee sees everyone's availability (who works which day).
         allow read: if isApproved();
         allow write: if isApproved() && request.auth.uid == uid;
+        // Managers may only refresh the copied name, when renaming an employee.
+        allow update: if isManager() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName']);
       }
     }
   }
